@@ -2,8 +2,6 @@
 
 module CrushPics
   class Client
-    DEFAULT_READ_TIMEOUT = 30
-
     attr_reader :api_token, :response
 
     def initialize(api_token:)
@@ -130,7 +128,7 @@ module CrushPics
     def perform_request(request, uri)
       http = Net::HTTP.new(uri.hostname, uri.port)
       http.use_ssl = true
-      http.read_timeout = CrushPics.configuration.read_timeout || DEFAULT_READ_TIMEOUT
+      http.read_timeout = CrushPics.configuration.read_timeout
       http.set_debug_output(CrushPics.configuration.debug_logger) if CrushPics.configuration.debug_logger
       @response = CrushPics::Response.new(http.request(request))
       check_response!
