@@ -8,7 +8,7 @@ module CrushPics
       @api_token = api_token
     end
 
-    def compress_async(io: nil, url: nil, level:, type:)
+    def compress_async(io: nil, url: nil, level: nil, type: nil)
       attrs = build_image_attributes(io: io, url: url, level: level, type: type)
 
       http_post('original_images', attrs)
@@ -17,7 +17,7 @@ module CrushPics
       response
     end
 
-    def compress_sync(io: nil, url: nil, level:, type:)
+    def compress_sync(io: nil, url: nil, level: nil, type: nil)
       attrs = build_image_attributes(io: io, url: url, level: level, type: type)
 
       http_post('compress', attrs)
@@ -118,7 +118,7 @@ module CrushPics
         raise StandardError, 'Specify image IO or URL'
       end
 
-      attrs
+      attrs.reject { |_k, v| v.nil? }
     end
 
     def base_url
