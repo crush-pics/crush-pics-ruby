@@ -96,7 +96,7 @@ module CrushPics
 
       raise(CrushPics::UnauthorizedError) if response.unauthorized?
 
-      raise(CrushPics::ClientError, response.response.message) if response.client_error?
+      raise(CrushPics::ClientError, response.http.message) if response.client_error?
 
       raise(CrushPics::UnknownError)
     end
