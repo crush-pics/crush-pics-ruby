@@ -2,14 +2,16 @@
 
 module CrushPics
   class Client
+    VALID_STYLE_ATTRIBUTES = %w[width style].freeze
+
     attr_reader :api_token, :response
 
     def initialize(api_token:)
       @api_token = api_token
     end
 
-    def compress_async(io: nil, url: nil, level: nil, type: nil)
-      attrs = build_image_attributes(io: io, url: url, level: level, type: type)
+    def compress_async(io: nil, url: nil, level: nil, type: nil, resize: nil)
+      attrs = build_image_attributes(io: io, url: url, level: level, type: type, resize: resize)
 
       http_post('original_images', attrs)
       return yield(response) if block_given?
@@ -17,8 +19,8 @@ module CrushPics
       response
     end
 
-    def compress_sync(io: nil, url: nil, level: nil, type: nil)
-      attrs = build_image_attributes(io: io, url: url, level: level, type: type)
+    def compress_sync(io: nil, url: nil, level: nil, type: nil, resize: nil)
+      attrs = build_image_attributes(io: io, url: url, level: level, type: type, resize: resize)
 
       http_post('compress', attrs)
       return yield(response) if block_given?
@@ -63,7 +65,7 @@ module CrushPics
       request = Net::HTTP::Post.new(uri)
       headers.transform_keys! { |key| key.to_s.tr('_', '-') }
       default_headers.merge(headers).each { |k, v| request[k] = v }
-      request.set_form_data(payload)
+      request.body = payload.to_json
 
       perform_request(request, uri)
     end
@@ -107,8 +109,18 @@ module CrushPics
       end
     end
 
-    def build_image_attributes(io: nil, url: nil, level:, type:)
+    def build_image_attributes(io: nil, url: nil, level:, type:, resize: nil)
       attrs = { origin: 'api', compression_level: level, compression_type: type }
+
+      if resize
+        raise(InvalidResizeValueError, '"resize" has to be an Array') unless resize.is_a?(Array)
+
+        valid = resize.all? { |style| style.is_a?(Hash) && style.keys.map(&:to_s).difference(VALID_STYLE_ATTRIBUTES).empty? }
+
+        raise(InvalidResizeValueError, 'style object has to have "width", "height" and "style" attributes') unless valid
+
+        attrs.store(:resize, resize)
+      end
 
       if io
         attrs.store(:file, io)

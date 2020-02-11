@@ -5,4 +5,5 @@ module CrushPics
   class ClientError < StandardError; end
   class UnknownError < StandardError; end
   class UnauthorizedError < StandardError; end
+  class InvalidResizeValueError < StandardError; end
 end
