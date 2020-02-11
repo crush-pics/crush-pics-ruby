@@ -5,6 +5,7 @@ require 'net/http'
 
 require 'crush_pics/exceptions'
 require 'crush_pics/configuration'
+require 'crush_pics/compress_options'
 require 'crush_pics/client'
 require 'crush_pics/response'
 require 'crush_pics/webhook'

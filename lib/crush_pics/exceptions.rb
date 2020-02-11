@@ -6,4 +6,5 @@ module CrushPics
   class UnknownError < StandardError; end
   class UnauthorizedError < StandardError; end
   class InvalidResizeValueError < StandardError; end
+  class MissingImageSourceError < StandardError; end
 end

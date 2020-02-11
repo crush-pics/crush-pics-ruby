@@ -2,8 +2,6 @@
 
 module CrushPics
   class Client
-    VALID_STYLE_ATTRIBUTES = %w[width style].freeze
-
     attr_reader :api_token, :response
 
     def initialize(api_token:)
@@ -11,18 +9,18 @@ module CrushPics
     end
 
     def compress_async(io: nil, url: nil, level: nil, type: nil, resize: nil)
-      attrs = build_image_attributes(io: io, url: url, level: level, type: type, resize: resize)
+      options = CrushPics::CompressOptions.new(io: io, url: url, level: level, type: type, resize: resize).to_h
 
-      http_post('original_images', attrs)
+      http_post('original_images', options)
       return yield(response) if block_given?
 
       response
     end
 
     def compress_sync(io: nil, url: nil, level: nil, type: nil, resize: nil)
-      attrs = build_image_attributes(io: io, url: url, level: level, type: type, resize: resize)
+      options = CrushPics::CompressOptions.new(io: io, url: url, level: level, type: type, resize: resize).to_h
 
-      http_post('compress', attrs)
+      http_post('compress', options)
       return yield(response) if block_given?
 
       response
@@ -107,30 +105,6 @@ module CrushPics
       { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }.tap do |h|
         h.store('Authorization', "Bearer #{ api_token }") if api_token
       end
-    end
-
-    def build_image_attributes(io: nil, url: nil, level:, type:, resize: nil)
-      attrs = { origin: 'api', compression_level: level, compression_type: type }
-
-      if resize
-        raise(InvalidResizeValueError, '"resize" has to be an Array') unless resize.is_a?(Array)
-
-        valid = resize.all? { |style| style.is_a?(Hash) && style.keys.map(&:to_s).difference(VALID_STYLE_ATTRIBUTES).empty? }
-
-        raise(InvalidResizeValueError, 'style object has to have "width", "height" and "style" attributes') unless valid
-
-        attrs.store(:resize, resize)
-      end
-
-      if io
-        attrs.store(:file, io)
-      elsif url
-        attrs.store(:image_url, url)
-      else
-        raise StandardError, 'Specify image IO or URL'
-      end
-
-      attrs.reject { |_k, v| v.nil? }
     end
 
     def base_url
