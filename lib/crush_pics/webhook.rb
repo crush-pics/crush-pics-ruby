@@ -23,7 +23,9 @@ module CrushPics
     end
 
     def styles
-      @styles ||= payload['optimized_images'].map { |img| [img['style'], img.slice('size', 'link', 'id', 'expire_at')] }.to_h
+      @styles ||= payload['optimized_images'].map do |img|
+        [img['style'], img.slice('size', 'link', 'id', 'expire_at', 'status')]
+      end.to_h
     end
   end
 end
