@@ -20,7 +20,7 @@ module CrushPics
         attrs.delete(:file)
         attrs.store(:image_url, url)
       end
-      attrs.reject! { |_k, v| v.nil? || v.empty? }
+      attrs.reject! { |_k, v| v.to_s.empty? }
       validate!
       attrs
     end
